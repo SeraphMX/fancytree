@@ -108,7 +108,13 @@ $.ui.fancytree.registerExtension("table", {
 		}
 		tree.rowFragment.appendChild($row.get(0));
 
+		// Make sure that status classes are set on the node's <tr> elements
+		tree.statusClassPropName = "tr";
+		tree.ariaPropName = "tr";
+		this.nodeContainerAttrName = "tr";
+
 		this._super(ctx);
+
 		// standard Fancytree created a root UL
 		$(tree.rootNode.ul).remove();
 		tree.rootNode.ul = null;
@@ -122,9 +128,6 @@ $.ui.fancytree.registerExtension("table", {
 				.attr("role", "treegrid")
 				.attr("aria-readonly", true);
 		}
-		// Make sure that status classes are set on the node's <tr> elements
-		tree.statusClassPropName = "tr";
-		tree.ariaPropName = "tr";
 	},
 	/* Called by nodeRender to sync node order with tag order.*/
 //    nodeFixOrder: function(ctx) {
@@ -150,7 +153,7 @@ $.ui.fancytree.registerExtension("table", {
 	},
 	/* Override standard render. */
 	nodeRender: function(ctx, force, deep, collapsed, _recursive) {
-		var $cb, children, firstTr, i, l, newRow, prevNode, prevTr, subCtx,
+		var children, firstTr, i, l, newRow, prevNode, prevTr, subCtx,
 			tree = ctx.tree,
 			node = ctx.node,
 			opts = ctx.options,
@@ -194,14 +197,11 @@ $.ui.fancytree.registerExtension("table", {
 				node.span = $("span.fancytree-node", node.tr).get(0);
 				// Set icon, link, and title (normally this is only required on initial render)
 				this.nodeRenderTitle(ctx);
-				// move checkbox to custom column
-				if(opts.checkbox && opts.table.checkboxColumnIdx != null){
-//					$("span.fancytree-node", node.tr).get(0);
-					$cb = $("span.fancytree-checkbox", node.span).detach();
-					$(node.tr).find("td:first").append($cb);
-				}
 				// Allow tweaking, binding, after node was created for the first time
 				tree._triggerNodeEvent("createNode", ctx);
+			} else {
+				// Set icon, link, and title (normally this is only required on initial render)
+				this.nodeRenderTitle(ctx);
 			}
 		}
 		 // Allow tweaking after node state was rendered
@@ -249,8 +249,16 @@ $.ui.fancytree.registerExtension("table", {
 	//            this._super(ctx);
 	},
 	nodeRenderTitle: function(ctx, title) {
-		var node = ctx.node;
+		var $cb,
+			node = ctx.node,
+			opts = ctx.options;
+
 		this._super(ctx);
+				// move checkbox to custom column
+		if(opts.checkbox && opts.table.checkboxColumnIdx != null){
+			$cb = $("span.fancytree-checkbox", node.span).detach();
+			$(node.tr).find("td:first").html($cb);
+		}
 		// let user code write column content
 		ctx.tree._triggerNodeEvent("renderColumns", node);
 	},
@@ -260,6 +268,7 @@ $.ui.fancytree.registerExtension("table", {
 			opts = ctx.options;
 
 		 this._super(ctx);
+		 $(node.tr).removeClass("fancytree-node");
 		 // indent
 		 indent = (node.getLevel() - 1) * opts.table.indentation;
 		 if(indent){

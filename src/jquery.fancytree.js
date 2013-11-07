@@ -339,7 +339,7 @@ FancytreeNode.prototype = /**@lends FancytreeNode*/{
 			// insert nodeList after children[pos]
 			this.children.splice.apply(this.children, [pos, 0].concat(nodeList));
 		}
-		if(!this.parent || this.parent.ul){
+		if( !this.parent || this.parent.ul || this.tr ){
 			// render if the parent was rendered (or this is a root node)
 			this.render();
 		}
@@ -766,8 +766,8 @@ FancytreeNode.prototype = /**@lends FancytreeNode*/{
 	/** @returns {boolean | undefined} Check if node has children (returns undefined, if not sure). */
 	hasChildren: function() {
 		if(this.lazy){
-			if(this.children === null || this.children === undefined){
-				// Not yet loaded
+			if(this.children == null ){
+				// null or undefined: Not yet loaded
 				return undefined;
 			}else if(this.children.length === 0){
 				// Loaded, but response was empty
@@ -2015,16 +2015,16 @@ Fancytree.prototype = /**@lends Fancytree*/{
 			if(source.url){
 				// `source` is an Ajax options object
 				ajax = $.extend({}, ctx.options.ajax, source);
-				if(ajax.debugLazyDelay){
+				if(ajax.debugDelay){
 					// simulate a slow server
-					delay = ajax.debugLazyDelay;
+					delay = ajax.debugDelay;
 					if($.isArray(delay)){ // random delay range [min..max]
 						delay = delay[0] + Math.random() * (delay[1] - delay[0]);
 					}
 					node.debug("nodeLoadChildren waiting debug delay " + Math.round(delay) + "ms");
 					dfd = $.Deferred();
 					setTimeout(function(){
-						ajax.debugLazyDelay = false;
+						ajax.debugDelay = false;
 						self.nodeLoadChildren(ctx, ajax).complete(function(){
 							dfd.resolve.apply(this, arguments);
 						});
@@ -2540,7 +2540,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 		if( isLastSib ){
 			cnList.push(cn.lastsib);
 		}
-		if( node.lazy && node.children === null ){
+		if( node.lazy && node.children == null ){
 			cnList.push(cn.lazy);
 		}
 		if( node.partsel ){
@@ -2566,7 +2566,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 		}else{
 			cnList.push(cn.combinedExpanderPrefix +
 					(node.expanded ? "e" : "c") +
-					(node.lazy && node.children === null ? "d" : "") +
+					(node.lazy && node.children == null ? "d" : "") +
 					(isLastSib ? "l" : "")
 					);
 		}
@@ -3054,7 +3054,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 				if(FT.focusTree.focusNode){
 					FT.focusTree.focusNode.setFocus(false);
 				}
-				FT.focusTree.$container.removeClass("fancytree-focused");
+				FT.focusTree.$container.removeClass("fancytree-treefocus");
 				this._triggerTreeEvent("blurTree");
 				FT.focusTree = null;
 			}
@@ -3062,7 +3062,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 		//
 		if( flag && FT.focusTree !== this ){
 			FT.focusTree = this;
-			this.$container.addClass("fancytree-focused");
+			this.$container.addClass("fancytree-treefocus");
 			// Make sure container gets `:focus` when we clicked inside
 			if( !this.systemFocusElement ){
 				this.debug("Set `:focus` to container");
@@ -3235,23 +3235,10 @@ $.widget("ui.fancytree",
 		},
 		tabbable: true,
 		_classNames: {
-//			container: "fancytree-container",
 			node: "fancytree-node",
 			folder: "fancytree-folder",
-//			empty: "fancytree-empty",
-//			vline: "fancytree-vline",
-//			expander: "fancytree-expander",
-//            connector: "fancytree-connector",
-//			checkbox: "fancytree-checkbox",
-//			icon: "fancytree-icon",
-//			title: "fancytree-title",
-//			noConnector: "fancytree-no-connector",
-//			statusnodeError: "fancytree-statusnode-error",
-//			statusnodeWait: "fancytree-statusnode-wait",
-//			hidden: "fancytree-hidden",
 			combinedExpanderPrefix: "fancytree-exp-",
 			combinedIconPrefix: "fancytree-ico-",
-//			loading: "fancytree-loading",
 			hasChildren: "fancytree-has-children",
 			active: "fancytree-active",
 			selected: "fancytree-selected",
@@ -3527,18 +3514,18 @@ $.extend($.ui.fancytree,
 	getEventTarget: function(event){
 		var tcn = event && event.target ? event.target.className : "",
 			res = {node: this.getNode(event.target), type: undefined};
-		// TODO: use map for fast lookup
-		// FIXME: cannot work, when tcn also contains UI themeroller classes
-		//        Use $(res.node).hasClass() instead
-		if( tcn === "fancytree-title" ){
+		// tcn may contains UI themeroller or Font Awesome classes, so we use
+		// a fast version of $(res.node).hasClass()
+		// See http://jsperf.com/test-for-classname/2
+		if( /\bfancytree-title\b/.test(tcn) ){
 			res.type = "title";
-		}else if( tcn === "fancytree-expander" ){
+		}else if( /\bfancytree-expander\b/.test(tcn) ){
 			res.type = (res.node.hasChildren() === false ? "prefix" : "expander");
-		}else if( tcn === "fancytree-checkbox" ){
+		}else if( /\bfancytree-checkbox\b/.test(tcn) ){
 			res.type = "checkbox";
-		}else if( tcn === "fancytree-icon" ){
+		}else if( /\bfancytree-icon\b/.test(tcn) ){
 			res.type = "icon";
-		}else if( tcn.indexOf("fancytree-node") >= 0 ){
+		}else if( /\bfancytree-node\b/.test(tcn) ){
 			// TODO: issue #93 (http://code.google.com/p/fancytree/issues/detail?id=93)
 //			res.type = this._getTypeForOuterNodeEvent(event);
 			res.type = "title";

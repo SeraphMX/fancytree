@@ -239,7 +239,7 @@ span.fancytree-icon /* Default icon */
 }
 span.fancytree-focused .fancytree-title {
 	outline: 1px dotted black;
-	color: white;
+	/*color: white;*/
 }
 span.fancytree-selected .fancytree-title,
 span.fancytree-active .fancytree-title {
@@ -248,8 +248,8 @@ span.fancytree-active .fancytree-title {
 span.fancytree-selected .fancytree-title {
 	font-style: italic;
 }
-.fancytree-focused span.fancytree-selected .fancytree-title,
-.fancytree-focused span.fancytree-active .fancytree-title {
+.fancytree-treefocus span.fancytree-selected .fancytree-title,
+.fancytree-treefocus span.fancytree-active .fancytree-title {
 	color: white;
 	background-color: #3875D7; /*blue*/
 }
@@ -349,15 +349,15 @@ table.fancytree-ext-columnview span.fancytree-cv-right {
 /*******************************************************************************
  * 'filter' extension
  */
-.fancytree-ext-filter span.fancytree-node .fancytree-title {
+.fancytree-ext-filter .fancytree-node .fancytree-title {
 	color: silver;
 	font-weight: lighter;
 }
-.fancytree-ext-filter span.fancytree-node.fancytree-submatch .fancytree-title {
+.fancytree-ext-filter .fancytree-node.fancytree-submatch .fancytree-title {
 	color: black;
 	font-weight: normal;
 }
-.fancytree-ext-filter span.fancytree-node.fancytree-match .fancytree-title {
+.fancytree-ext-filter .fancytree-node.fancytree-match .fancytree-title {
 	color: black;
 	font-weight: bold;
 }
