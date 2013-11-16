@@ -1400,11 +1400,13 @@ function Fancytree(widget){
 	}
 	// Add container to the TAB chain
 	// See http://www.w3.org/TR/wai-aria-practices/#focus_activedescendant
-	if(this.options.tabbable){
-		this.$container.attr("tabindex", "0");
-	}
+	// if(this.options.tabbable){
+	// 	this.$container.attr("tabindex", "0");
+	// }
+	this.$container.attr("tabindex", this.options.tabbable ? "0" : "-1");
 	if(this.options.aria){
-		this.$container.attr("role", "tree")
+		this.$container
+			.attr("role", "tree")
 			.attr("aria-multiselectable", true);
 	}
 }
@@ -3015,25 +3017,25 @@ Fancytree.prototype = /**@lends Fancytree*/{
 		return dfd;
 	},
 	/* Handle focus and blur events for the container (also fired for child elements). */
-	treeOnFocusInOut: function(event) {
-		var flag = (event.type === "focusin"),
-			node = $.ui.fancytree.getNode(event);
+	// treeOnFocusInOut: function(event) {
+	// 	var flag = (event.type === "focusin"),
+	// 		node = $.ui.fancytree.getNode(event);
 
-		try{
-			this.debug("treeOnFocusInOut(" + flag + "), node=", node);
-			_assert(!this._inFocusHandler, "Focus handler recursion");
-			this.systemFocusElement = flag ? event.target : null;
-			this._inFocusHandler = true;
-			if(node){
-				// For example clicking into an <input> that is part of a node
-				this._callHook("nodeSetFocus", node, flag);
-			}else{
-				this._callHook("treeSetFocus", this, flag);
-			}
-		}finally{
-			this._inFocusHandler = false;
-		}
-	},
+	// 	try{
+	// 		this.debug("treeOnFocusInOut(" + flag + "), node=", node);
+	// 		_assert(!this._inFocusHandler, "Focus handler recursion");
+	// 		this.systemFocusElement = flag ? event.target : null;
+	// 		this._inFocusHandler = true;
+	// 		if(node){
+	// 			// For example clicking into an <input> that is part of a node
+	// 			this._callHook("nodeSetFocus", node, flag);
+	// 		}else{
+	// 			this._callHook("treeSetFocus", this, flag);
+	// 		}
+	// 	}finally{
+	// 		this._inFocusHandler = false;
+	// 	}
+	// },
 	/* */
 	treeSetFocus: function(ctx, flag, _calledByNodeSetFocus) {
 		flag = (flag !== false);
@@ -3348,28 +3350,35 @@ $.widget("ui.fancytree",
 		var that = this,
 			opts = this.options,
 			tree = this.tree,
-			ns = tree._ns,
-			selstartEvent = ( $.support.selectstart ? "selectstart" : "mousedown" );
+			ns = tree._ns
+			// selstartEvent = ( $.support.selectstart ? "selectstart" : "mousedown" )
+			;
 
 		// Remove all previuous handlers for this tree
 		this._unbind();
 
 		//alert("keydown" + ns + "foc=" + tree.hasFocus() + tree.$container);
 		tree.debug("bind events; container: ", tree.$container);
-		tree.$container.bind("focusin" + ns + " focusout" + ns, function(event){
-			tree.debug("Tree container got event " + event.type);
-			tree.treeOnFocusInOut.call(tree, event);
-		}).delegate("span.fancytree-title", selstartEvent + ns, function(event){
+		tree.$container.on("focusin" + ns + " focusout" + ns, function(event){
+			var node = FT.getNode(event),
+				flag = (event.type === "focusin");
+			tree.debug("Tree container got event " + event.type, node);
+			// tree.treeOnFocusInOut.call(tree, event);
+			if(node){
+				// For example clicking into an <input> that is part of a node
+				tree._callHook("nodeSetFocus", node, flag);
+			}else{
+				tree._callHook("treeSetFocus", tree, flag);
+			}
+		}).on("selectstart" + ns, "span.fancytree-title", function(event){
 			// prevent mouse-drags to select text ranges
-			tree.debug("<span> got event " + event.type);
+			tree.debug("<span title> got event " + event.type);
 			event.preventDefault();
-		});
-		// keydown must be bound to document, because $container might not
-		// receive these events
-		$(document).bind("keydown" + ns, function(event){
+		}).on("keydown" + ns, function(event){
 			// TODO: also bind keyup and keypress
-			tree.debug("doc got event " + event.type + ", hasFocus:" + tree.hasFocus());
-			if(opts.disabled || opts.keyboard === false || !tree.hasFocus()){
+			tree.debug("got event " + event.type + ", hasFocus:" + tree.hasFocus());
+			// if(opts.disabled || opts.keyboard === false || !tree.hasFocus() ){
+			if(opts.disabled || opts.keyboard === false ){
 				return true;
 			}
 			var node = tree.focusNode,
