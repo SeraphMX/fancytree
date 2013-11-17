@@ -1364,6 +1364,7 @@ function Fancytree(widget){
 	this._ns = ".fancytree-" + this._id; // append for namespaced events
 	this.activeNode = null;
 	this.focusNode = null;
+	this._hasFocus = null;
 	this.lastSelectedNode = null;
 	this.systemFocusElement = null,
 
@@ -1396,9 +1397,6 @@ function Fancytree(widget){
 	}
 	// Add container to the TAB chain
 	// See http://www.w3.org/TR/wai-aria-practices/#focus_activedescendant
-	// if(this.options.tabbable){
-	// 	this.$container.attr("tabindex", "0");
-	// }
 	this.$container.attr("tabindex", this.options.tabbable ? "0" : "-1");
 	if(this.options.aria){
 		this.$container
@@ -1642,7 +1640,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 	 * @returns {Boolean} true if the tree control has keyboard focus
 	 */
 	hasFocus: function(){
-		return FT.focusTree === this;
+		return !!this._hasFocus;
 	},
 	/** Write to browser console if debugLevel >= 1 (prepending tree info)
 	 *
@@ -2799,7 +2797,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 		}
 		// Set focus to container and node
 		if(flag){
-			if(FT.focusTree !== tree){
+			if( !this.hasFocus() ){
 				node.debug("nodeSetFocus: forcing container focus");
 				// Note: we pass _calledByNodeSetFocus=true
 				this._callHook("treeSetFocus", ctx, true, true);
@@ -3048,47 +3046,59 @@ Fancytree.prototype = /**@lends Fancytree*/{
 	// 	}
 	// },
 	/* */
+// 	treeSetFocus: function(ctx, flag, _calledByNodeSetFocus) {
+// 		flag = (flag !== false);
+
+// 		this.debug("treeSetFocus(" + flag + "), _calledByNodeSetFocus: " + _calledByNodeSetFocus);
+// 		this.debug("    focusNode: " + this.focusNode);
+// 		this.debug("    activeNode: " + this.activeNode);
+// 		// Blur previous tree if any
+// 		if(FT.focusTree){
+// 			if(this !== FT.focusTree || !flag ){
+// 				// prev. node looses focus, if prev. tree blurs
+// 				if(FT.focusTree.focusNode){
+// 					FT.focusTree.focusNode.setFocus(false);
+// 				}
+// 				FT.focusTree.$container.removeClass("fancytree-treefocus");
+// 				this._triggerTreeEvent("blurTree");
+// 				FT.focusTree = null;
+// 			}
+// 		}
+// 		//
+// 		if( flag && FT.focusTree !== this ){
+// 			FT.focusTree = this;
+// 			this.$container.addClass("fancytree-treefocus");
+// 			// Make sure container gets `:focus` when we clicked inside
+// 			if( !this.systemFocusElement ){
+// 				this.debug("Set `:focus` to container");
+// 				this.$container.focus();
+// 			}
+// 			// Set focus to a node
+// 			if( ! this.focusNode && !_calledByNodeSetFocus){
+// 				if( this.activeNode ){
+// 					this.activeNode.setFocus();
+// 				}else if( this.rootNode.hasChildren()){
+// 					this.warn("NOT setting focus to first child");
+// //					this.rootNode.getFirstChild().setFocus();
+// 				}
+// 			}
+// 			this._triggerTreeEvent("focusTree");
+// 		}else{
+// 			FT.focusTree = null;
+// 		}
+
+// 	},
 	treeSetFocus: function(ctx, flag, _calledByNodeSetFocus) {
 		flag = (flag !== false);
 
 		this.debug("treeSetFocus(" + flag + "), _calledByNodeSetFocus: " + _calledByNodeSetFocus);
 		this.debug("    focusNode: " + this.focusNode);
 		this.debug("    activeNode: " + this.activeNode);
-		// Blur previous tree if any
-		if(FT.focusTree){
-			if(this !== FT.focusTree || !flag ){
-				// prev. node looses focus, if prev. tree blurs
-				if(FT.focusTree.focusNode){
-					FT.focusTree.focusNode.setFocus(false);
-				}
-				FT.focusTree.$container.removeClass("fancytree-treefocus");
-				this._triggerTreeEvent("blurTree");
-				FT.focusTree = null;
-			}
+		if( flag !== this.hasFocus() ){
+			this._hasFocus = flag;
+			this.$container.toggleClass("fancytree-treefocus", flag);
+			this._triggerTreeEvent(flag ? "focusTree" : "blurTree");
 		}
-		//
-		if( flag && FT.focusTree !== this ){
-			FT.focusTree = this;
-			this.$container.addClass("fancytree-treefocus");
-			// Make sure container gets `:focus` when we clicked inside
-			if( !this.systemFocusElement ){
-				this.debug("Set `:focus` to container");
-				this.$container.focus();
-			}
-			// Set focus to a node
-			if( ! this.focusNode && !_calledByNodeSetFocus){
-				if( this.activeNode ){
-					this.activeNode.setFocus();
-				}else if( this.rootNode.hasChildren()){
-					this.warn("NOT setting focus to first child");
-//					this.rootNode.getFirstChild().setFocus();
-				}
-			}
-			this._triggerTreeEvent("focusTree");
-		}else{
-			FT.focusTree = null;
-		}
-
 	},
 	/** Re-fire beforeActivate and activate events. */
 	reactivate: function(setFocus) {
@@ -3481,7 +3491,7 @@ $.extend($.ui.fancytree,
 	_nextId: 1,
 	_nextNodeKey: 1,
 	_extensions: {},
-	focusTree: null,
+	// focusTree: null,
 
 	/** Expose class object as $.ui.fancytree._FancytreeClass */
 	_FancytreeClass: Fancytree,

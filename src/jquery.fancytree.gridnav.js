@@ -33,10 +33,9 @@ $.ui.fancytree.registerExtension("gridnav", {
 	version: "0.0.1",
 	// Default options for this extension.
 	options: {
-		autofocusInput: true,
-		startKeys: [],
-		beforeEdit: $.noop, //
-		edit: $.noop //
+		autofocusInput: true, // focus first embedded input if node gets activated
+		handleUpDown: true,   // Allow UP/DOWN in inputs to move to prev/next node
+		nodeTabbable: true    // Add node title to TAB chain
 	},
 	// Local attributes
 	currentNode: null,
@@ -46,18 +45,24 @@ $.ui.fancytree.registerExtension("gridnav", {
 	// `this._local`: the namespace that contains extension attributes and private methods (same as this.ext.EXTNAME)
 	// `this._super`: the virtual function that was overridden (member of previous extension or Fancytree)
 	treeInit: function(ctx){
+
 		this._super(ctx);
 
+		// 
 		this.$container
 			.addClass("fancytree-ext-gridnav")
 			.attr("tabindex", "0");
+
 		// Activate node if embedded input gets focus
 		this.$container.on("focusin", "input", function(event){
-			var //tree = ctx.tree,
+			var ctx2,
 				node = $.ui.fancytree.getNode(event.target);
+
 			node.debug("INPUT focusin", event.target, event);
 			if( !node.isActive() ){
-				node.setActive();
+				// Call node.setActive(), but also pass the event
+				ctx2 = ctx.tree._makeHookContext(node, event);
+				ctx.tree._callHook("nodeSetActive", ctx2, true);
 			}
 		}).on("focusin", function(event){
 			ctx.tree.debug("$container focusin");
@@ -72,27 +77,35 @@ $.ui.fancytree.registerExtension("gridnav", {
 	// 	// Add node title to the tab sequence
 	// 	$(ctx.node.span).find("span.fancytree-title").attr("tabindex", "0");
 	// },
-	nodeRenderStatus: function(ctx) {
-		this._super(ctx);
-		// // Add node title to the tab sequence
-		// $(ctx.node.span)
-		// 	.find("span.fancytree-title")
-		// 	.attr("tabindex", "0");
-	},
+	// nodeRenderStatus: function(ctx) {
+	// 	this._super(ctx);
+	// 	// // Add node title to the tab sequence
+	// 	// $(ctx.node.span)
+	// 	// 	.find("span.fancytree-title")
+	// 	// 	.attr("tabindex", "0");
+	// },
 	nodeSetActive: function(ctx, flag) {
-		var $node = $(ctx.node.tr || ctx.node.span),
+		var opts = ctx.options.gridnav,
+			node = ctx.node,
+			$node = $(node.tr || node.span),
+			//wasInputFocus = ctx.originalEvent && $(ctx.originalEvent.target).is(":input"),
 			$subInput = $node.find(":input:enabled:first");
 		flag = flag !== false;
+
+		ctx.node.debug("set tabindex to " + (flag ? "0" : ""), ctx, opts);
+
 		this._super(ctx, flag);
+
 		// Add node title to the tab sequence
-		$(ctx.node.span)
+		$(node.span)
 			.find("span.fancytree-title")
 			.attr("tabindex", flag ? "0" : "");
-		ctx.node.debug("set tabindex to " + (flag ? "0" : ""));
 		if(flag){
-			ctx.tree.$container
-				.attr("tabindex", "");
-			ctx.node.debug("focus sub " + $subInput.length);
+			// If one node is tabbable, the container no longer needs to be
+			ctx.tree.$container .attr("tabindex", "");
+			// if wasInputFocus
+			node.debug("focus sub " + $subInput.length);
+
 			$subInput.focus();
 		}
 	},
