@@ -17,7 +17,7 @@
 	}
 </style>
 
-	<link href="../src/skin-win8/ui.fancytree.css" rel="stylesheet" type="text/css">
+	<link href="../src/skin-win7/ui.fancytree.css" rel="stylesheet" type="text/css">
 	<script src="../src/jquery.fancytree.js" type="text/javascript"></script>
 	<script src="../src/jquery.fancytree.table.js" type="text/javascript"></script>
 	<script src="../src/jquery.fancytree.gridnav.js" type="text/javascript"></script>
@@ -45,8 +45,24 @@ SORUCE = [
 	//  ]}
 ];
 	$(function(){
-		// Attach the fancytree widget to an existing <div id="tree"> element
-		// and pass the tree options as an argument to the fancytree() function:
+
+		$("#plainTree").fancytree({
+			// extensions: ["gridnav"],
+			// gridnav: {
+			// 	autofocusInput: false, // focus first embedded input if node gets activated
+			// 	handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
+			// 	nodesTabbable: false   // Add all node titles to TAB chain
+			// },
+			checkbox: true,
+			aria: true,
+			// source: { url: "../demo/ajax-tree-plain.json" },
+			source: SORUCE,
+			lazyload: function(e, data) {
+				data.result = {url: "../demo/ajax-sub2.json"};
+			}
+		});
+
+
 		$("#tableTree").fancytree({
 			extensions: ["table", "gridnav"],
 			checkbox: true,
@@ -76,22 +92,6 @@ SORUCE = [
 				$tdList.eq(4).html("<input type='input' value='" + node.key + "'>");
 				$tdList.eq(5).html("<input type='checkbox' value='" + node.key + "'>");
 				$tdList.eq(6).html("<input type='checkbox' value='" + node.key + "'>");
-			}
-		});
-
-
-		$("#plainTree").fancytree({
-			extensions: ["gridnav"],
-			gridnav: {
-				autofocusInput: false, // focus first embedded input if node gets activated
-				handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
-				nodesTabbable: false   // Add all node titles to TAB chain
-			},
-			checkbox: true,
-			// source: { url: "../demo/ajax-tree-plain.json" },
-			source: SORUCE,
-			lazyload: function(e, data) {
-				data.result = {url: "../demo/ajax-sub2.json"};
 			}
 		});
 
@@ -143,6 +143,20 @@ SORUCE = [
 	</ul>
 
 	<!-- Add a <table> element where the tree should appear: -->
+
+	<div>
+		<label>Fake input:<input/></label>
+	</div>
+
+	<!-- Plain Tree -->
+	<h1>Simple Tree</h1>
+	<p>Behaves like a common listbox</p>
+	<div id="plainTree"></div>
+
+	<div>
+		<label>Fake input:<input id="input1"/></label>
+	</div>
+
 	<table id="tableTree">
 		<colgroup>
 		<col width="30px"></col>
@@ -159,17 +173,9 @@ SORUCE = [
 	</table>
 
 	<div>
-		<label>Fake input:<input id="input1"/></label>
-	</div>
-	<!-- Plain Tree -->
-	<h1>Simple Tree</h1>
-	<p>Behaves like a common listbox</p>
-	<div id="plainTree"></div>
-
-	<div>
 		<label>Fake input:<input id="input2"/></label>
 	</div>
-	<!-- Plain Tree -->
+
 	<h1>Tree with embedded controls</h1>
 	<p>Behaves like a common listbox</p>
 	<div id="inputTree"></div>

@@ -27,12 +27,12 @@
 
 // Allow these navigation keys even when input controls are focused
 
-var INPUT_KEYS = {
-		"text": [$.ui.keyCode.UP, $.ui.keyCode.DOWN],
-		"checkbox": [],
-		"radiobutton": []
-	},
-	KC = $.ui.keyCode;
+var	KC = $.ui.keyCode,
+	NAV_KEYS = {
+		"text": [KC.UP, KC.DOWN],
+		"checkbox": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT],
+		"radiobutton": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT]
+	};
 
 
 function findNeighbourTd($target, keyCode){
@@ -66,30 +66,22 @@ $.ui.fancytree.registerExtension("gridnav", {
 
 		this._super(ctx);
 
-		//
 		this.$container
 			.addClass("fancytree-ext-gridnav");
 			// .attr("tabindex", "0");
 
 		// Activate node if embedded input gets focus
-		this.$container
-			.on("focusin", "input", function(event){
-				var ctx2,
-					node = $.ui.fancytree.getNode(event.target);
+		this.$container.on("focusin", "input", function(event){
+			var ctx2,
+				node = $.ui.fancytree.getNode(event.target);
 
-				node.debug("INPUT focusin", event.target, event);
-				if( !node.isActive() ){
-					// Call node.setActive(), but also pass the event
-					ctx2 = ctx.tree._makeHookContext(node, event);
-					ctx.tree._callHook("nodeSetActive", ctx2, true);
-				}
-			// }).on("focusin", function(event){
-			// 	ctx.tree.debug("$container focusin");
-			// }).on("focusout", function(event){
-			// 	ctx.tree.debug("$container focusout");
-			// }).on("keydown", function(event){
-			// 	ctx.tree.debug("$container keydown", event);
-			});
+			node.debug("INPUT focusin", event.target, event);
+			if( !node.isActive() ){
+				// Call node.setActive(), but also pass the event
+				ctx2 = ctx.tree._makeHookContext(node, event);
+				ctx.tree._callHook("nodeSetActive", ctx2, true);
+			}
+		});
 	},
 	nodeRender: function(ctx) {
 		this._super(ctx);
@@ -109,33 +101,22 @@ $.ui.fancytree.registerExtension("gridnav", {
 		var opts = ctx.options.gridnav,
 			node = ctx.node,
 			event = ctx.originalEvent || {},
+			triggeredByInput = $(event.target).is(":input"),
 			$node = $(node.tr || node.span);
 
 		flag = (flag !== false);
 
 		this._super(ctx, flag);
 
-		// ctx.node.debug("set tabindex to " + (flag ? "0" : ""), ctx, opts);
-		// Add node title to the tab sequence
-		// if( !opts.nodesTabbable ){
-		// 	if ( flag ){
-		// 		$(ctx.node.span).find("span.fancytree-title").attr("tabindex", "0");
-		// 	}else{
-		// 		$(ctx.node.span).find("span.fancytree-title").removeAttr("tabindex");
-		// 	}
-		// }
-
-		// $(node.span)
-		// 	.find("span.fancytree-title")
-		// 	.attr("tabindex", flag ? "0" : "");
-
-		if(flag){
+		if( flag ){
 			if( opts.nodesTabbable ){
-				$(node.span).find("span.fancytree-title").focus();
+				if( !triggeredByInput ) {
+					$(node.span).find("span.fancytree-title").focus();
+				}
 				// If one node is tabbable, the container no longer needs to be
 				// ctx.tree.$container .attr("tabindex", "-1");
 				ctx.tree.$container.removeAttr("tabindex");
-			} else if( opts.autofocusInput && !$(event.target).is(":input") ){
+			} else if( opts.autofocusInput && !triggeredByInput ){
 				// Set focus to input sub input (if node was clicked, but not
 				// when TAB was pressed )
 				$node.find(":input:enabled:first").focus();
@@ -144,25 +125,23 @@ $.ui.fancytree.registerExtension("gridnav", {
 	},
 	nodeKeydown: function(ctx) {
 		var inputType, handleKeys, $td,
+			opts = ctx.options.gridnav,
 			event = ctx.originalEvent,
 			$target = $(event.target);
 
-		if( $target.is(":input:enabled") ){
-			if( ctx.options.gridnav.handleUpDown ){
-				inputType = $target.prop("type");
-				handleKeys = INPUT_KEYS[inputType];
+		if( $target.is(":input:enabled") && opts.handleUpDown ){
+			inputType = $target.prop("type");
+			handleKeys = NAV_KEYS[inputType];
+			if( handleKeys && $.inArray(event.which, handleKeys) >= 0 ){
 				$td = findNeighbourTd($target, event.which);
+				ctx.node.debug("ignore keydown in input", event.which, handleKeys);
 				if( $td && $td.length ) {
 					$td.find(":input:enabled").focus();
+					// Prevent Fancytree default navigation
 					return false;
 				}
-				// if( handleKeys && $.inArray(event.which, handleKeys) === -1 ){
-				// 	ctx.node.debug("ignore keydown in input", event.which, handleKeys);
-				// 	// Prevent Fancytree default navigation
-				// 	return true;
-				// }
-				return true;
 			}
+			return true;
 		}
 		this._super(ctx);
 	}
