@@ -196,14 +196,20 @@ $.ui.fancytree.registerExtension("table", {
 				// Set icon, link, and title (normally this is only required on initial render)
 				this.nodeRenderTitle(ctx);
 				// Allow tweaking, binding, after node was created for the first time
-				tree._triggerNodeEvent("createNode", ctx);
+//				tree._triggerNodeEvent("createNode", ctx);
+				if ( opts.createNode ){
+					opts.createNode.call(tree, {type: "createNode"}, ctx);
+				}
 			} else {
 				// Set icon, link, and title (normally this is only required on initial render)
 				this.nodeRenderTitle(ctx);
 			}
 		}
 		 // Allow tweaking after node state was rendered
-		tree._triggerNodeEvent("renderNode", ctx);
+//		tree._triggerNodeEvent("renderNode", ctx);
+		if ( opts.renderNode ){
+			opts.renderNode.call(tree, {type: "renderNode"}, ctx);
+		}
 		// Visit child nodes
 		// Add child markup
 		children = node.children;
