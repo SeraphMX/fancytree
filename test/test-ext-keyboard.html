@@ -89,7 +89,7 @@ $(function(){
 		gridnav: {
 			autofocusInput: false, // focus first embedded input if node gets activated
 			handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
-			nodesTabbable: false   // Add all node titles to TAB chain
+			nodesTabbable: true   // Add all node titles to TAB chain
 		},
 		checkbox: true,
 		source: SORUCE,
@@ -136,11 +136,13 @@ $(function(){
 	<h1>Table Tree</h1>
 	<ul>
 		<li>Try TAB and cursor keys to navigate the grid.</li>
-		<li>Node title is focusable, so we TAB to a context where SPACE, LEFT, '-', ... work</li>
+		<li>Node title is focusable, so we can TAB to a context where SPACE, 
+			LEFT, '-', ... work</li>
 		<li>Setting focus inside an input activates the node.</li>
-		<li>Vlicking a node title sets focus to first input</li>
-		<li>TODO: foucusout is not reliably detected for the container</li>
-		<li>TODO: TAB after last row element does not activate next row</li>
+		<li>Clicking a node title sets focus to first input</li>
+		<li>TODO: focusout is not reliably detected for the container 
+			(should dimm active node in Win8 skin)</li>
+		<li>TODO: DOWN fails if next line is hidden</li>
 	</ul>
 
 	<div>
@@ -163,7 +165,9 @@ $(function(){
 
 	<h1>Tree with embedded controls</h1>
 	<ul>
-		<li>TODO.</li>
+		<li>TODO: handle UP/DOWN inside input?</li>
+		<li>TODO: tabbing from outside into the tree will now activate the first node,
+		    (used to be the last active node)</li>
 	</ul>
 	<div>
 		<label>Fake input:<input id="input2"/></label>

@@ -56,7 +56,7 @@ $.ui.fancytree.registerExtension("gridnav", {
 	options: {
 		autofocusInput: false,  // Focus first embedded input if node gets activated
 		handleUpDown: true,     // Allow UP/DOWN in inputs to move to prev/next node
-		nodesTabbable: true    // Add node title to TAB chain
+		nodesTabbable: true     // Add node title to TAB chain
 	},
 
 	treeInit: function(ctx){
@@ -65,13 +65,14 @@ $.ui.fancytree.registerExtension("gridnav", {
 
 		this.$container.addClass("fancytree-ext-gridnav");
 
-		// Activate node if embedded input gets focus
-		this.$container.on("focusin", "input", function(event){
+		// Activate node if embedded input gets focus (due to a click)
+//		this.$container.on("focusin", "input", function(event){
+		this.$container.on("focusin", function(event){
 			var ctx2,
 				node = $.ui.fancytree.getNode(event.target);
 
 			// node.debug("INPUT focusin", event.target, event);
-			if( !node.isActive() ){
+			if( node && !node.isActive() ){
 				// Call node.setActive(), but also pass the event
 				ctx2 = ctx.tree._makeHookContext(node, event);
 				ctx.tree._callHook("nodeSetActive", ctx2, true);
@@ -109,7 +110,7 @@ $.ui.fancytree.registerExtension("gridnav", {
 					$(node.span).find("span.fancytree-title").focus();
 				}
 				// If one node is tabbable, the container no longer needs to be
-				// ctx.tree.$container.attr("tabindex", "-1");
+				ctx.tree.$container.attr("tabindex", "-1");
 				// ctx.tree.$container.removeAttr("tabindex");
 			} else if( opts.autofocusInput && !triggeredByInput ){
 				// Set focus to input sub input (if node was clicked, but not
