@@ -39,82 +39,70 @@ SORUCE = [
 		{title: "node 2.1"},
 		{title: "node 2.2"}
 	 ]}
-	// {title: "node 3", folder: true, children: [
-	// 	{title: "node 3.1 with <input type='input' value='input'>"},
-	// 	{title: "node 3.2 with <input type='input' value='input'>"}
-	//  ]}
 ];
-	$(function(){
+$(function(){
 
-		$("#plainTree").fancytree({
-			// extensions: ["gridnav"],
-			// gridnav: {
-			// 	autofocusInput: false, // focus first embedded input if node gets activated
-			// 	handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
-			// 	nodesTabbable: false   // Add all node titles to TAB chain
-			// },
-			checkbox: true,
-			aria: true,
-			// source: { url: "../demo/ajax-tree-plain.json" },
-			source: SORUCE,
-			lazyload: function(e, data) {
-				data.result = {url: "../demo/ajax-sub2.json"};
-			}
-		});
-
-
-		$("#tableTree").fancytree({
-			extensions: ["table", "gridnav"],
-			checkbox: true,
-			table: {
-				indentation: 20,      // indent 20px per node level
-				nodeColumnIdx: 2,     // render the node title into the 2nd column
-				checkboxColumnIdx: 0  // render the checkboxes into the 1st column
-			},
-			gridnav: {
-				autofocusInput: false, // focus first embedded input if node gets activated
-				handleUpDown: true,   // Allow UP/DOWN in inputs to move to prev/next node
-				nodesTabbable: true   // Add all node titles to TAB chain
-			},
-			// source: { url: "../demo/ajax-tree-plain.json" },
-			source: SORUCE,
-			lazyload: function(e, data) {
-				data.result = {url: "../demo/ajax-sub2.json"};
-			},
-			renderColumns: function(e, data) {
-				var node = data.node,
-					$tdList = $(node.tr).find(">td");
-				// (index #0 is rendered by fancytree by adding the checkbox)
-				$tdList.eq(1).text(node.getIndexHier()).addClass("alignRight");
-				// (index #2 is rendered by fancytree)
-				// $tdList.eq(3).text(node.key);
-				$tdList.eq(3).html("<input type='input' value='" + node.key + "'>");
-				$tdList.eq(4).html("<input type='input' value='" + node.key + "'>");
-				$tdList.eq(5).html("<input type='checkbox' value='" + node.key + "'>");
-				$tdList.eq(6).html("<input type='checkbox' value='" + node.key + "'>");
-			}
-		});
-
-
-		$("#inputTree").fancytree({
-			extensions: ["gridnav"],
-			gridnav: {
-				autofocusInput: false, // focus first embedded input if node gets activated
-				handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
-				nodesTabbable: false   // Add all node titles to TAB chain
-			},
-			checkbox: true,
-			source: SORUCE,
-			createNode: function(e, data) {
-				// add fake <input/> to the node
-				var $input = $("<input/>").val(data.node.title);
-				$("span.fancytree-title", data.node.li).after($input);
-			},
-			lazyload: function(e, data) {
-				data.result = {url: "../demo/ajax-sub2.json"};
-			}
-		});
+	$("#plainTree").fancytree({
+		checkbox: true,
+//		aria: true,
+		source: SORUCE,
+		lazyload: function(e, data) {
+			data.result = {url: "../demo/ajax-sub2.json"};
+		}
 	});
+
+
+	$("#tableTree").fancytree({
+		extensions: ["table", "gridnav"],
+		checkbox: true,
+		table: {
+			indentation: 20,      // indent 20px per node level
+			nodeColumnIdx: 2,     // render the node title into the 2nd column
+			checkboxColumnIdx: 0  // render the checkboxes into the 1st column
+		},
+		gridnav: {
+			autofocusInput: false, // focus first embedded input if node gets activated
+			handleUpDown: true,    // Allow UP/DOWN in inputs to move to prev/next node
+			nodesTabbable: true    // Add all node titles to TAB chain
+		},
+		source: SORUCE,
+		lazyload: function(e, data) {
+			data.result = {url: "../demo/ajax-sub2.json"};
+		},
+		renderColumns: function(e, data) {
+			var node = data.node,
+				$tdList = $(node.tr).find(">td");
+			// (index #0 is rendered by fancytree by adding the checkbox)
+			$tdList.eq(1).text(node.getIndexHier()).addClass("alignRight");
+			// (index #2 is rendered by fancytree)
+			// $tdList.eq(3).text(node.key);
+			$tdList.eq(3).html("<input type='input' value='" + node.key + "'>");
+			$tdList.eq(4).html("<input type='input' value='" + node.key + "'>");
+			$tdList.eq(5).html("<input type='checkbox' value='" + node.key + "'>");
+			$tdList.eq(6).html("<input type='checkbox' value='" + node.key + "'>");
+		}
+	});
+
+
+	$("#inputTree").fancytree({
+		extensions: ["gridnav"],
+		gridnav: {
+			autofocusInput: false, // focus first embedded input if node gets activated
+			handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
+			nodesTabbable: false   // Add all node titles to TAB chain
+		},
+		checkbox: true,
+		source: SORUCE,
+		createNode: function(e, data) {
+			// add fake <input/> to the node
+			var $input = $("<input/>").val(data.node.title);
+			$("span.fancytree-title", data.node.li).after($input);
+		},
+		lazyload: function(e, data) {
+			data.result = {url: "../demo/ajax-sub2.json"};
+		}
+	});
+});
 </script>
 </head>
 
@@ -134,29 +122,30 @@ SORUCE = [
 		<label for="skinswitcher">Skin:</label> <select id="skinswitcher"></select>
 	</div>
 
-	<h1>Table Tree</h1>
+	<!-- Plain Tree -->
+	<h1>Simple Tree</h1>
 	<ul>
-		<li>Try TAB and cursor keys to navigate the grid.</li>
-		<li>Node title is tabbable, so Shift+TAB will</li>
-		<li>Setting focus inside an input activates the node</li>
-		<li>clicking a node title sets focus to first input</li>
+		<li>Behaves like a common listbox.</li>
 	</ul>
-
-	<!-- Add a <table> element where the tree should appear: -->
 
 	<div>
 		<label>Fake input:<input/></label>
 	</div>
-
-	<!-- Plain Tree -->
-	<h1>Simple Tree</h1>
-	<p>Behaves like a common listbox</p>
 	<div id="plainTree"></div>
+
+	<h1>Table Tree</h1>
+	<ul>
+		<li>Try TAB and cursor keys to navigate the grid.</li>
+		<li>Node title is focusable, so we TAB to a context where SPACE, LEFT, '-', ... work</li>
+		<li>Setting focus inside an input activates the node.</li>
+		<li>Vlicking a node title sets focus to first input</li>
+		<li>TODO: foucusout is not reliably detected for the container</li>
+		<li>TODO: TAB after last row element does not activate next row</li>
+	</ul>
 
 	<div>
 		<label>Fake input:<input id="input1"/></label>
 	</div>
-
 	<table id="tableTree">
 		<colgroup>
 		<col width="30px"></col>
@@ -172,12 +161,13 @@ SORUCE = [
 		</tbody>
 	</table>
 
+	<h1>Tree with embedded controls</h1>
+	<ul>
+		<li>TODO.</li>
+	</ul>
 	<div>
 		<label>Fake input:<input id="input2"/></label>
 	</div>
-
-	<h1>Tree with embedded controls</h1>
-	<p>Behaves like a common listbox</p>
 	<div id="inputTree"></div>
 
 	<div>

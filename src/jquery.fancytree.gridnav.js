@@ -22,9 +22,6 @@
  * Private functions and variables
  */
 
-// var isMac = /Mac/.test(navigator.platform);
-
-
 // Allow these navigation keys even when input controls are focused
 
 var	KC = $.ui.keyCode,
@@ -66,16 +63,14 @@ $.ui.fancytree.registerExtension("gridnav", {
 
 		this._super(ctx);
 
-		this.$container
-			.addClass("fancytree-ext-gridnav");
-			// .attr("tabindex", "0");
+		this.$container.addClass("fancytree-ext-gridnav");
 
 		// Activate node if embedded input gets focus
 		this.$container.on("focusin", "input", function(event){
 			var ctx2,
 				node = $.ui.fancytree.getNode(event.target);
 
-			node.debug("INPUT focusin", event.target, event);
+			// node.debug("INPUT focusin", event.target, event);
 			if( !node.isActive() ){
 				// Call node.setActive(), but also pass the event
 				ctx2 = ctx.tree._makeHookContext(node, event);
@@ -98,11 +93,11 @@ $.ui.fancytree.registerExtension("gridnav", {
 	// 	// 	.attr("tabindex", "0");
 	// },
 	nodeSetActive: function(ctx, flag) {
-		var opts = ctx.options.gridnav,
+		var $outer,
+			opts = ctx.options.gridnav,
 			node = ctx.node,
 			event = ctx.originalEvent || {},
-			triggeredByInput = $(event.target).is(":input"),
-			$node = $(node.tr || node.span);
+			triggeredByInput = $(event.target).is(":input");
 
 		flag = (flag !== false);
 
@@ -114,12 +109,13 @@ $.ui.fancytree.registerExtension("gridnav", {
 					$(node.span).find("span.fancytree-title").focus();
 				}
 				// If one node is tabbable, the container no longer needs to be
-				// ctx.tree.$container .attr("tabindex", "-1");
-				ctx.tree.$container.removeAttr("tabindex");
+				// ctx.tree.$container.attr("tabindex", "-1");
+				// ctx.tree.$container.removeAttr("tabindex");
 			} else if( opts.autofocusInput && !triggeredByInput ){
 				// Set focus to input sub input (if node was clicked, but not
 				// when TAB was pressed )
-				$node.find(":input:enabled:first").focus();
+				$outer = $(node.tr || node.span);
+				$outer.find(":input:enabled:first").focus();
 			}
 		}
 	},
