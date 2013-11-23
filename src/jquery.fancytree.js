@@ -1930,7 +1930,9 @@ Fancytree.prototype = /**@lends Fancytree*/{
 				tree.nodeSetActive(ctx, true);
 				break;
 			case KC.BACKSPACE:
-				_goto(node.parent);
+				if( node.parent && node.parent.parent ) {
+					_goto(node.parent);
+				}
 				break;
 			case KC.LEFT:
 				if( node.expanded ) {
@@ -3380,7 +3382,7 @@ $.widget("ui.fancytree",
 		tree.$container.on("focusin" + ns + " focusout" + ns, function(event){
 			var node = FT.getNode(event),
 				flag = (event.type === "focusin");
-			tree.debug("Tree container got event " + event.type, node);
+			tree.debug("Tree container got event " + event.type, node, event);
 			// tree.treeOnFocusInOut.call(tree, event);
 			if(node){
 				// For example clicking into an <input> that is part of a node
