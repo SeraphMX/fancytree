@@ -40,9 +40,9 @@ function findNeighbourTd($target, keyCode){
 		case KC.RIGHT:
 			return $td.next();
 		case KC.UP:
-			return $td.parent().prev(":visible").find("td").eq($td.index());
+			return $td.parent().prevAll(":visible").first().find("td").eq($td.index());
 		case KC.DOWN:
-			return $td.parent().next(":visible").find("td").eq($td.index());
+			return $td.parent().nextAll(":visible").first().find("td").eq($td.index());
 	}
 	return null;
 }
