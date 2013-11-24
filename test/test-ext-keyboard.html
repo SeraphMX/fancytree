@@ -62,8 +62,9 @@ $(function(){
 		},
 		gridnav: {
 			autofocusInput: false, // focus first embedded input if node gets activated
-			handleUpDown: true,    // Allow UP/DOWN in inputs to move to prev/next node
-			nodesTabbable: true    // Add all node titles to TAB chain
+			handleCursorKeys: true,    // Allow UP/DOWN in inputs to move to prev/next node
+			titlesTabbable: true    // Add all node titles to TAB chain
+			// titlesTabbable: "active"    // Add all node titles to TAB chain
 		},
 		source: SORUCE,
 		lazyload: function(e, data) {
@@ -92,8 +93,8 @@ $(function(){
 		extensions: ["gridnav"],
 		gridnav: {
 			autofocusInput: false, // focus first embedded input if node gets activated
-			handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
-			nodesTabbable: true   // Add all node titles to TAB chain
+			handleCursorKeys: false,   // Allow UP/DOWN in inputs to move to prev/next node
+			titlesTabbable: true   // Add all node titles to TAB chain
 		},
 		checkbox: true,
 		source: SORUCE,
@@ -152,14 +153,18 @@ $(function(){
 		<li>Node title is focusable, so we can TAB to a context where SPACE, 
 			LEFT, BACK, '-', '+', ... work</li>
 		<li>Setting focus inside an input activates the node.</li>
-		<li>TODO: tabbing from outside into the tree will now activate the first node,
-		    (used to be the last active node). 
-		    Only *one* node title should have the tabbable attribute set(?)</li>
+		<li>Note: tabbing from outside into the tree will now activate the 
+			first node, (used to be the last active node).
+		    Setting 'tabbable' only to the active node wouldn't help, because 
+		    the first row contains a tabbable input element anyway.</li>
 		<li>TODO: focusout is not reliably detected for the container 
 			(should dimm active node in Win8 skin)</li>
-		<li>TODO?: gridnav currently assumes that cells contain only one embedded :input</li>
-		<li>TODO: ext-gridnav could be dropped and merged into core and ext-table instead</li>
-		<li>TODO: css should be modified to remove the system focus border from node titles (currently theme dependant)</li>
+		<li>TODO?: gridnav currently assumes that cells contain only one embedded 
+			:input</li>
+		<li>TODO: ext-gridnav could be dropped and merged into core and 
+			ext-table instead</li>
+		<li>TODO: css should be modified to remove the system focus border from 
+			node titles (currently theme dependant)</li>
 	</ul>
 
 	<div>
@@ -185,12 +190,15 @@ $(function(){
 
 	<h1>Tree with embedded controls</h1>
 	<ul>
-		<li>TODO: handle or block UP/DOWN inside input? Note that one node may contain multiple focusable elements...</li>
-		<li>TODO: tabbing from outside into the tree will now activate the first node,
-		    (used to be the last active node). 
-		    Only *one* node title should have the tabbable attribute set(?)</li>
+		<li>TODO: handle or block UP/DOWN inside input? Note that one node may 
+			contain multiple focusable elements...</li>
+		<li>Note: tabbing from outside into the tree will now activate the 
+			first node, (used to be the last active node).
+		    Setting 'tabbable' only to the active node wouldn't help, because 
+		    the first row contains a tabbable input element anyway.</li>
 		<li>TODO: ext-gridnav should not be required </li>
-		<li>TODO: css should be modified to remove the system focus border from node titles (currently theme dependant)</li>
+		<li>TODO: css should be modified to remove the system focus border from 
+			node titles (currently theme dependant)</li>
 	</ul>
 	<div>
 		<label>Fake input:<input id="input2"/></label>
