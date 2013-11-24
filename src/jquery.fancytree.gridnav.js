@@ -27,7 +27,7 @@
 var	KC = $.ui.keyCode,
 	// which keys are *not* handled by embedded control, but passed to tree 
 	// navigation handler:
-	NAV_KEYS = { 
+	NAV_KEYS = {
 		"text": [KC.UP, KC.DOWN],
 		"checkbox": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT],
 		"radiobutton": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT],
