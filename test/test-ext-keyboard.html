@@ -71,6 +71,7 @@ $(function(){
 		},
 		renderColumns: function(e, data) {
 			var node = data.node,
+				$select = $("<select>"),
 				$tdList = $(node.tr).find(">td");
 			// (index #0 is rendered by fancytree by adding the checkbox)
 			$tdList.eq(1).text(node.getIndexHier()).addClass("alignRight");
@@ -80,6 +81,9 @@ $(function(){
 			$tdList.eq(4).html("<input type='input' value='" + node.key + "'>");
 			$tdList.eq(5).html("<input type='checkbox' value='" + node.key + "'>");
 			$tdList.eq(6).html("<input type='checkbox' value='" + node.key + "'>");
+			$("<option>", {text: "a", value: "a"}).appendTo($select);
+			$("<option>", {text: "b"}).appendTo($select);
+			$tdList.eq(7).html($select);
 		}
 	});
 
@@ -131,6 +135,15 @@ $(function(){
 	<div>
 		<label>Fake input:<input/></label>
 	</div>
+	<div>
+		<label for="lb1">Fake listbox:</label>
+		(Note that we can TAB over it without selecting or TAB on it and then 
+		press DOWN to select. A selected item is dimmed on blur.)<br>
+		<select name="lb1" id="lb1" size="2" multiple="multiple">
+			<option value="a">a</option>
+			<option value="b">b</option>
+		</select>
+	</div>
 	<div id="plainTree"></div>
 
 	<h1>Table Tree</h1>
@@ -142,7 +155,6 @@ $(function(){
 		<li>Clicking a node title sets focus to first input</li>
 		<li>TODO: focusout is not reliably detected for the container 
 			(should dimm active node in Win8 skin)</li>
-		<li>TODO: DOWN fails if next line is hidden</li>
 	</ul>
 
 	<div>
@@ -154,10 +166,13 @@ $(function(){
 		<col width="30px"></col>
 		<col width="250px"></col>
 		<col width="50px"></col>
+		<col width="50px"></col>
 		<col width="30px"></col>
+		<col width="30px"></col>
+		<col width="50px"></col>
 		</colgroup>
 		<thead>
-			<tr> <th></th> <th>#</th> <th></th> <th>Ed1</th> <th>Ed2</th> <th>Rb1</th> <th>Rb2</th> </tr>
+			<tr> <th></th> <th>#</th> <th></th> <th>Ed1</th> <th>Ed2</th> <th>Rb1</th> <th>Rb2</th> <th>Cb</th></tr>
 		</thead>
 		<tbody>
 		</tbody>
@@ -165,7 +180,7 @@ $(function(){
 
 	<h1>Tree with embedded controls</h1>
 	<ul>
-		<li>TODO: handle UP/DOWN inside input?</li>
+		<li>TODO: handle or block UP/DOWN inside input? Note that one node may contain multiple focusable elements...</li>
 		<li>TODO: tabbing from outside into the tree will now activate the first node,
 		    (used to be the last active node)</li>
 	</ul>

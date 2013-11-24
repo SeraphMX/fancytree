@@ -25,10 +25,14 @@
 // Allow these navigation keys even when input controls are focused
 
 var	KC = $.ui.keyCode,
-	NAV_KEYS = {
+	// which keys are *not* handled by embedded control, but passed to tree 
+	// navigation handler:
+	NAV_KEYS = { 
 		"text": [KC.UP, KC.DOWN],
 		"checkbox": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT],
-		"radiobutton": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT]
+		"radiobutton": [KC.UP, KC.DOWN, KC.LEFT, KC.RIGHT],
+		"select-one": [KC.LEFT, KC.RIGHT],
+		"select-multiple": [KC.LEFT, KC.RIGHT]
 	};
 
 
@@ -126,12 +130,15 @@ $.ui.fancytree.registerExtension("gridnav", {
 			event = ctx.originalEvent,
 			$target = $(event.target);
 
-		if( $target.is(":input:enabled") && opts.handleUpDown ){
-			inputType = $target.prop("type");
+		// jQuery
+		inputType = $target.is(":input:enabled") ? $target.prop("type") : null;
+		ctx.node.debug("input", event, inputType);
+
+		if( inputType && opts.handleUpDown ){
 			handleKeys = NAV_KEYS[inputType];
 			if( handleKeys && $.inArray(event.which, handleKeys) >= 0 ){
 				$td = findNeighbourTd($target, event.which);
-				ctx.node.debug("ignore keydown in input", event.which, handleKeys);
+				// ctx.node.debug("ignore keydown in input", event.which, handleKeys);
 				if( $td && $td.length ) {
 					$td.find(":input:enabled").focus();
 					// Prevent Fancytree default navigation
