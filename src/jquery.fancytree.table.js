@@ -264,7 +264,10 @@ $.ui.fancytree.registerExtension("table", {
 			$(node.tr).find("td:first").html($cb);
 		}
 		// let user code write column content
-		ctx.tree._triggerNodeEvent("renderColumns", node);
+		// ctx.tree._triggerNodeEvent("renderColumns", node);
+		if ( opts.renderColumns ){
+			opts.renderColumns.call(ctx.tree, {type: "renderColumns"}, ctx);
+		}
 	},
 	nodeRenderStatus: function(ctx) {
 		var indent,
