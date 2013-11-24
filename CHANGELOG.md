@@ -12,11 +12,12 @@
   * [BUG] Fixed #71, #75, #90
   * Improved table render speed by 15%
   * `grunt dev` combines `grunt server` + `grunt watch`
+  * [FEATURE] Allow to pass metadata with `source` on initialization
 
 
 # 2.0.0-4
 
-  * Fixes
+  * Misc. fixes
 
 
 # 2.0.0-3
