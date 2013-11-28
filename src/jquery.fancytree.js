@@ -3339,17 +3339,26 @@ $.widget("ui.fancytree",
 			if(opts.disabled || opts.keyboard === false ){
 				return true;
 			}
-			var node = tree.focusNode,
-				// node may be null
+			var res,
+				node = tree.focusNode, // node may be null
 				ctx = tree._makeHookContext(node || tree, event),
 				prevPhase = tree.phase;
+
 			try {
 				tree.phase = "userEvent";
+				// If a 'fancytreekeydown' handler returns false, skip the default
+				// handling (implemented by tree.nodeKeydown()). 
 				if(node){
-					return ( tree._triggerNodeEvent("keydown", node, event) === false ) ? false : tree._callHook("nodeKeydown", ctx);
+					res = tree._triggerNodeEvent("keydown", node, event);
 				}else{
-					return ( tree._triggerTreeEvent("keydown", event) === false ) ? false : tree._callHook("nodeKeydown", ctx);
+					res = tree._triggerTreeEvent("keydown", event);
 				}
+				if ( res === "preventNav" ){
+					res = true; // prevent keyboard navigation, but don't prevent default handling of embedded input controls
+				} else if ( res !== false ){
+					res = tree._callHook("nodeKeydown", ctx);
+				}
+				return res;
 			} finally {
 				tree.phase = prevPhase;
 			}

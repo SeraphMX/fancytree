@@ -61,10 +61,9 @@ $(function(){
 			checkboxColumnIdx: 0  // render the checkboxes into the 1st column
 		},
 		gridnav: {
-			autofocusInput: false, // focus first embedded input if node gets activated
-			handleCursorKeys: true,    // Allow UP/DOWN in inputs to move to prev/next node
-			titlesTabbable: true    // Add all node titles to TAB chain
-			// titlesTabbable: "active"    // Add all node titles to TAB chain
+			autofocusInput: false,   // focus first embedded input if node gets activated
+			handleCursorKeys: true,  // Allow UP/DOWN in inputs to move to prev/next node
+			titlesTabbable: true     // Add all node titles to TAB chain
 		},
 		source: SORUCE,
 		lazyload: function(e, data) {
@@ -90,21 +89,49 @@ $(function(){
 
 
 	$("#inputTree").fancytree({
-		extensions: ["gridnav"],
-		gridnav: {
-			autofocusInput: false, // focus first embedded input if node gets activated
-			handleCursorKeys: false,   // Allow UP/DOWN in inputs to move to prev/next node
-			titlesTabbable: true   // Add all node titles to TAB chain
-		},
 		checkbox: true,
 		source: SORUCE,
-		createNode: function(e, data) {
-			// add fake <input/> to the node
-			var $input = $("<input/>").val(data.node.title);
-			$("span.fancytree-title", data.node.li).after($input);
-		},
 		lazyload: function(e, data) {
 			data.result = {url: "../demo/ajax-sub2.json"};
+		},
+		createNode: function(e, data) {
+			// add fake <input/> to the nodes
+			var $input = $("<input/>").val(data.node.title);
+
+			$("span.fancytree-title", data.node.span)
+				.append($input)
+				// .attr("tabindex", "0")
+				;
+		},
+		activate: function(e, data){
+			// Set focus to embedded input
+			var node = data.node;
+			console.info("activate", e, data);
+			$("span.fancytree-title :input", node.span).focus();
+		},
+		keydown: function(e, data){
+			// Set focus to embedded input
+			var KC = $.ui.keyCode,
+				node = data.node;
+
+			console.info("fancytreekeydown", e, data);
+			if( $(e.originalEvent.target).is(":input") ){
+				switch( e.which ){
+					case KC.LEFT:
+					case KC.RIGHT:
+					case KC.BACKSPACE:
+					case KC.SPACE:
+						data.result = "preventNav";
+						return;
+				}
+				return;
+			}
+		}
+	}).on("focusin", function(event){
+		// Activate node when embedded input gets focus
+		var node = $.ui.fancytree.getNode(event);
+		if( node && !node.isActive() ){
+			node.setActive();
 		}
 	});
 });
@@ -190,13 +217,15 @@ $(function(){
 
 	<h1>Tree with embedded controls</h1>
 	<ul>
-		<li>TODO: handle or block UP/DOWN inside input? Note that one node may 
-			contain multiple focusable elements...</li>
+		<li>Typical use case is passing 'input' tags as part of the title.</li>
+		<li>There may be many different constructs (one or more embedded controls, 
+			inside of after title span, ...).
+			So we handle this with custom event handlers instead of built-in 
+			magic.</li>
 		<li>Note: tabbing from outside into the tree will now activate the 
 			first node, (used to be the last active node).
 		    Setting 'tabbable' only to the active node wouldn't help, because 
 		    the first row contains a tabbable input element anyway.</li>
-		<li>TODO: ext-gridnav should not be required </li>
 		<li>TODO: css should be modified to remove the system focus border from 
 			node titles (currently theme dependant)</li>
 	</ul>

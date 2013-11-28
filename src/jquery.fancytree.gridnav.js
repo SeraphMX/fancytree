@@ -121,6 +121,7 @@ $.ui.fancytree.registerExtension("gridnav", {
 			if( opts.titlesTabbable ){
 				if( !triggeredByInput ) {
 					$(node.span).find("span.fancytree-title").focus();
+					node.setFocus();
 				}
 				// If one node is tabbable, the container no longer needs to be
 				ctx.tree.$container.attr("tabindex", "-1");
