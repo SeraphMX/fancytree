@@ -104,27 +104,29 @@ $(function(){
 				;
 		},
 		activate: function(e, data){
-			// Set focus to embedded input
 			var node = data.node;
-			console.info("activate", e, data);
+
+			// Set focus to embedded input
 			$("span.fancytree-title :input", node.span).focus();
 		},
 		keydown: function(e, data){
-			// Set focus to embedded input
-			var KC = $.ui.keyCode,
-				node = data.node;
+			var KC = $.ui.keyCode;
 
-			console.info("fancytreekeydown", e, data);
 			if( $(e.originalEvent.target).is(":input") ){
+
+				// When inside an input, let the control handle the keys
+				data.result = "preventNav";
+
+				// But do the tree navigation on Ctrl + NAV_KEY
 				switch( e.which ){
 					case KC.LEFT:
 					case KC.RIGHT:
 					case KC.BACKSPACE:
 					case KC.SPACE:
-						data.result = "preventNav";
-						return;
+						if( e.shiftKey ){
+							data.node.navigate(e.which);
+						}
 				}
-				return;
 			}
 		}
 	}).on("focusin", function(event){
@@ -222,10 +224,13 @@ $(function(){
 			inside of after title span, ...).
 			So we handle this with custom event handlers instead of built-in 
 			magic.</li>
-		<li>Note: tabbing from outside into the tree will now activate the 
-			first node, (used to be the last active node).
-		    Setting 'tabbable' only to the active node wouldn't help, because 
-		    the first row contains a tabbable input element anyway.</li>
+		<li>The input controls can keep their own key handling because we return
+			`preventNav` in the `keydown` event.</li>
+		<li>Tree navigation is mapped to SHIFT + original_key by calling 
+			`node.navigate()` in the `keydown` event.</li>
+		<li>We bind to `focusin` of embedded :input controls, so we can activate 
+			the associated node. </li>
+		<li>on node `activate` we set focus to the embedded input.</li>
 		<li>TODO: css should be modified to remove the system focus border from 
 			node titles (currently theme dependant)</li>
 	</ul>

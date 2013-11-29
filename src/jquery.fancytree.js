@@ -1013,6 +1013,80 @@ FancytreeNode.prototype = /**@lends FancytreeNode*/{
 
 */
 	},
+	/** Set focus relative to this node and optionally activate.
+	 *
+	 * @param {number} where The keyCode that would normally trigger this move, 
+	 *		e.g. `$.ui.keyCode.LEFT` would collapse the node if it
+	 *      is expanded or move to the parent oterwise.
+	 * @param {boolean} [activate=true]  
+	 * @returns {$.Promise} 
+	 */
+	navigate: function(where, activate) {
+		var i, parents,
+			handled = true,
+			KC = $.ui.keyCode,
+			sib = null;
+
+		// Navigate to node
+		function _goto(n){
+			if( n ){
+				n.makeVisible();
+				return activate === false ? n.setFocus() : n.setActive();
+			}
+		}
+
+		switch( where ) {
+			case KC.BACKSPACE:
+				if( this.parent && this.parent.parent ) {
+					_goto(this.parent);
+				}
+				break;
+			case KC.LEFT:
+				if( this.expanded ) {
+					this.setExpanded(false);
+//					tree.nodeSetFocus(ctx);
+					_goto(this);
+				} else if( this.parent && this.parent.parent ) {
+//					this.parent.setFocus();
+					_goto(this.parent);
+				}
+				break;
+			case KC.RIGHT:
+				if( !this.expanded && (this.children || this.lazy) ) {
+					this.setExpanded();
+//					tree.nodeSetFocus(ctx);
+					_goto(this);
+				} else if( this.children && this.children.length ) {
+//					this.children[0].setFocus();
+					_goto(this.children[0]);
+				}
+				break;
+			case KC.UP:
+				sib = this.getPrevSibling();
+				while( sib && sib.expanded && sib.children && sib.children.length ){
+					sib = sib.children[sib.children.length - 1];
+				}
+				if( !sib && this.parent && this.parent.parent ){
+					sib = this.parent;
+				}
+				_goto(sib);
+				break;
+			case KC.DOWN:
+				if( this.expanded && this.children && this.children.length ) {
+					sib = this.children[0];
+				} else {
+					parents = this.getParentList(false, true);
+					for(i=parents.length-1; i>=0; i--) {
+						sib = parents[i].getNextSibling();
+						if( sib ){ break; }
+					}
+				}
+				_goto(sib);
+				break;
+			default:
+				handled = false;
+		}
+	},
 	/**
 	 * Discard and reload all children of a lazy node.
 	 * @param {Boolean} [discard=false]
@@ -1889,14 +1963,14 @@ Fancytree.prototype = /**@lends Fancytree*/{
 	 */
 	nodeKeydown: function(ctx) {
 		// TODO: return promise?
-		var i, parents,
+		var res,
 			event = ctx.originalEvent,
 			node = ctx.node,
 			tree = ctx.tree,
 			opts = ctx.options,
 			handled = true,
-			KC = $.ui.keyCode,
-			sib = null;
+			activate = !(event.ctrlKey || !opts.autoActivate ),
+			KC = $.ui.keyCode;
 
 //		node.debug("ftnode.nodeKeydown(" + event.type + "): ftnode:" + this + ", charCode:" + event.charCode + ", keyCode: " + event.keyCode + ", which: " + event.which);
 
@@ -1905,13 +1979,6 @@ Fancytree.prototype = /**@lends Fancytree*/{
 			this.rootNode.getFirstChild().setFocus();
 			node = ctx.node = this.focusNode;
 			node.debug("Keydown force focus on first node");
-		}
-		// Navigate to node
-		function _goto(n){
-			if( n ){
-				n.makeVisible();
-				return (event.ctrlKey || !opts.autoActivate ) ? n.setFocus() : n.setActive();
-			}
 		}
 
 		switch( event.which ) {
@@ -1935,51 +2002,11 @@ Fancytree.prototype = /**@lends Fancytree*/{
 				tree.nodeSetActive(ctx, true);
 				break;
 			case KC.BACKSPACE:
-				if( node.parent && node.parent.parent ) {
-					_goto(node.parent);
-				}
-				break;
 			case KC.LEFT:
-				if( node.expanded ) {
-					tree.nodeSetExpanded(ctx, false);
-//					tree.nodeSetFocus(ctx);
-					_goto(node);
-				} else if( node.parent && node.parent.parent ) {
-//					node.parent.setFocus();
-					_goto(node.parent);
-				}
-				break;
 			case KC.RIGHT:
-				if( !node.expanded && (node.children || node.lazy) ) {
-					tree.nodeSetExpanded(ctx, true);
-//					tree.nodeSetFocus(ctx);
-					_goto(node);
-				} else if( node.children && node.children.length ) {
-//					node.children[0].setFocus();
-					_goto(node.children[0]);
-				}
-				break;
 			case KC.UP:
-				sib = node.getPrevSibling();
-				while( sib && sib.expanded && sib.children && sib.children.length ){
-					sib = sib.children[sib.children.length - 1];
-				}
-				if( !sib && node.parent && node.parent.parent ){
-					sib = node.parent;
-				}
-				_goto(sib);
-				break;
 			case KC.DOWN:
-				if( node.expanded && node.children && node.children.length ) {
-					sib = node.children[0];
-				} else {
-					parents = node.getParentList(false, true);
-					for(i=parents.length-1; i>=0; i--) {
-						sib = parents[i].getNextSibling();
-						if( sib ){ break; }
-					}
-				}
-				_goto(sib);
+				res = node.navigate(event.which, activate);
 				break;
 			default:
 				handled = false;
@@ -1988,6 +2015,7 @@ Fancytree.prototype = /**@lends Fancytree*/{
 			event.preventDefault();
 		}
 	},
+
 
 	// /** Default handling for mouse keypress events. */
 	// nodeKeypress: function(ctx) {

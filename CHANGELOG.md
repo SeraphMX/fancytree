@@ -5,6 +5,8 @@
   * [FEATURE] Experimental `ext-gridnav` implents key navigation for tables.
     Refactored keyboard handling. Keydown handlers are now bound to the container instead of document  
     (Co-work with Koloto)
+  * [FEATURE] Allow to return 'preventNav' in keydown event to prevent withput blocking keys in embedded input controls.
+  * [FEATURE] new method `node.navigate()` to support custom keyboard handlers
   * [FEATURE] Refactored CSS style to use a common LESS template
   * [FEATURE] Improvement of lazy load errors handling (Koloto, issue #87)
   * [FEATURE] Edit extension (alpha)
