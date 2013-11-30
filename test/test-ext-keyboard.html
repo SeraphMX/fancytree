@@ -61,9 +61,9 @@ $(function(){
 			checkboxColumnIdx: 0  // render the checkboxes into the 1st column
 		},
 		gridnav: {
-			autofocusInput: false, // focus first embedded input if node gets activated
-			handleUpDown: true,    // Allow UP/DOWN in inputs to move to prev/next node
-			nodesTabbable: true    // Add all node titles to TAB chain
+			autofocusInput: false,   // focus first embedded input if node gets activated
+			handleCursorKeys: true,  // Allow UP/DOWN in inputs to move to prev/next node
+			titlesTabbable: true     // Add all node titles to TAB chain
 		},
 		source: SORUCE,
 		lazyload: function(e, data) {
@@ -89,21 +89,51 @@ $(function(){
 
 
 	$("#inputTree").fancytree({
-		extensions: ["gridnav"],
-		gridnav: {
-			autofocusInput: false, // focus first embedded input if node gets activated
-			handleUpDown: false,   // Allow UP/DOWN in inputs to move to prev/next node
-			nodesTabbable: true   // Add all node titles to TAB chain
-		},
 		checkbox: true,
 		source: SORUCE,
-		createNode: function(e, data) {
-			// add fake <input/> to the node
-			var $input = $("<input/>").val(data.node.title);
-			$("span.fancytree-title", data.node.li).after($input);
-		},
 		lazyload: function(e, data) {
 			data.result = {url: "../demo/ajax-sub2.json"};
+		},
+		createNode: function(e, data) {
+			// add fake <input/> to the nodes
+			var $input = $("<input/>").val(data.node.title);
+
+			$("span.fancytree-title", data.node.span)
+				.append($input)
+				// .attr("tabindex", "0")
+				;
+		},
+		activate: function(e, data){
+			var node = data.node;
+
+			// Set focus to embedded input
+			$("span.fancytree-title :input", node.span).focus();
+		},
+		keydown: function(e, data){
+			var KC = $.ui.keyCode;
+
+			if( $(e.originalEvent.target).is(":input") ){
+
+				// When inside an input, let the control handle the keys
+				data.result = "preventNav";
+
+				// But do the tree navigation on Ctrl + NAV_KEY
+				switch( e.which ){
+					case KC.LEFT:
+					case KC.RIGHT:
+					case KC.BACKSPACE:
+					case KC.SPACE:
+						if( e.shiftKey ){
+							data.node.navigate(e.which);
+						}
+				}
+			}
+		}
+	}).on("focusin", function(event){
+		// Activate node when embedded input gets focus
+		var node = $.ui.fancytree.getNode(event);
+		if( node && !node.isActive() ){
+			node.setActive();
 		}
 	});
 });
@@ -152,14 +182,18 @@ $(function(){
 		<li>Node title is focusable, so we can TAB to a context where SPACE, 
 			LEFT, BACK, '-', '+', ... work</li>
 		<li>Setting focus inside an input activates the node.</li>
-		<li>TODO: tabbing from outside into the tree will now activate the first node,
-		    (used to be the last active node). 
-		    Only *one* node title should have the tabbable attribute set(?)</li>
+		<li>Note: tabbing from outside into the tree will now activate the 
+			first node, (used to be the last active node).
+		    Setting 'tabbable' only to the active node wouldn't help, because 
+		    the first row contains a tabbable input element anyway.</li>
 		<li>TODO: focusout is not reliably detected for the container 
 			(should dimm active node in Win8 skin)</li>
-		<li>TODO?: gridnav currently assumes that cells contain only one embedded :input</li>
-		<li>TODO: ext-gridnav could be dropped and merged into core and ext-table instead</li>
-		<li>TODO: css should be modified to remove the system focus border from node titles (currently theme dependant)</li>
+		<li>TODO?: gridnav currently assumes that cells contain only one embedded 
+			:input</li>
+		<li>TODO: ext-gridnav could be dropped and merged into core and 
+			ext-table instead</li>
+		<li>TODO: css should be modified to remove the system focus border from 
+			node titles (currently theme dependant)</li>
 	</ul>
 
 	<div>
@@ -185,12 +219,20 @@ $(function(){
 
 	<h1>Tree with embedded controls</h1>
 	<ul>
-		<li>TODO: handle or block UP/DOWN inside input? Note that one node may contain multiple focusable elements...</li>
-		<li>TODO: tabbing from outside into the tree will now activate the first node,
-		    (used to be the last active node). 
-		    Only *one* node title should have the tabbable attribute set(?)</li>
-		<li>TODO: ext-gridnav should not be required </li>
-		<li>TODO: css should be modified to remove the system focus border from node titles (currently theme dependant)</li>
+		<li>Typical use case is passing 'input' tags as part of the title.</li>
+		<li>There may be many different constructs (one or more embedded controls, 
+			inside of after title span, ...).
+			So we handle this with custom event handlers instead of built-in 
+			magic.</li>
+		<li>The input controls can keep their own key handling because we return
+			`preventNav` in the `keydown` event.</li>
+		<li>Tree navigation is mapped to SHIFT + original_key by calling 
+			`node.navigate()` in the `keydown` event.</li>
+		<li>We bind to `focusin` of embedded :input controls, so we can activate 
+			the associated node. </li>
+		<li>on node `activate` we set focus to the embedded input.</li>
+		<li>TODO: css should be modified to remove the system focus border from 
+			node titles (currently theme dependant)</li>
 	</ul>
 	<div>
 		<label>Fake input:<input id="input2"/></label>

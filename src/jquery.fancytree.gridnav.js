@@ -58,9 +58,9 @@ $.ui.fancytree.registerExtension("gridnav", {
 	version: "0.0.1",
 	// Default options for this extension.
 	options: {
-		autofocusInput: false,  // Focus first embedded input if node gets activated
-		handleUpDown: true,     // Allow UP/DOWN in inputs to move to prev/next node
-		nodesTabbable: true     // Add node title to TAB chain
+		autofocusInput:   false,  // Focus first embedded input if node gets activated
+		handleCursorKeys: true,   // Allow UP/DOWN in inputs to move to prev/next node
+		titlesTabbable:   true    // Add node title to TAB chain
 	},
 
 	treeInit: function(ctx){
@@ -86,16 +86,25 @@ $.ui.fancytree.registerExtension("gridnav", {
 	nodeRender: function(ctx) {
 		this._super(ctx);
 		// Add every node title to the tab sequence
-		if( ctx.options.gridnav.nodesTabbable ){
+		if( ctx.options.gridnav.titlesTabbable === true ){
 			$(ctx.node.span).find("span.fancytree-title").attr("tabindex", "0");
 		}
 	},
 	// nodeRenderStatus: function(ctx) {
+	// 	var opts = ctx.options.gridnav,
+	// 		node = ctx.node;
+
 	// 	this._super(ctx);
-	// 	// // Add node title to the tab sequence
-	// 	// $(ctx.node.span)
-	// 	// 	.find("span.fancytree-title")
-	// 	// 	.attr("tabindex", "0");
+
+	//	// Note: Setting 'tabbable' only to the active node wouldn't help, 
+	//  // because the first row contains a tabbable input element anyway.
+	// 	if( opts.titlesTabbable === "active" ){
+	// 		if( node.isActive() ){
+	// 			$(node.span) .find("span.fancytree-title") .attr("tabindex", "0");
+	// 		}else{
+	// 			$(node.span) .find("span.fancytree-title") .removeAttr("tabindex");
+	// 		}
+	// 	}
 	// },
 	nodeSetActive: function(ctx, flag) {
 		var $outer,
@@ -109,9 +118,10 @@ $.ui.fancytree.registerExtension("gridnav", {
 		this._super(ctx, flag);
 
 		if( flag ){
-			if( opts.nodesTabbable ){
+			if( opts.titlesTabbable ){
 				if( !triggeredByInput ) {
 					$(node.span).find("span.fancytree-title").focus();
+					node.setFocus();
 				}
 				// If one node is tabbable, the container no longer needs to be
 				ctx.tree.$container.attr("tabindex", "-1");
@@ -134,7 +144,7 @@ $.ui.fancytree.registerExtension("gridnav", {
 		inputType = $target.is(":input:enabled") ? $target.prop("type") : null;
 		ctx.node.debug("input", event, inputType);
 
-		if( inputType && opts.handleUpDown ){
+		if( inputType && opts.handleCursorKeys ){
 			handleKeys = NAV_KEYS[inputType];
 			if( handleKeys && $.inArray(event.which, handleKeys) >= 0 ){
 				$td = findNeighbourTd($target, event.which);
