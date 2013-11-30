@@ -11,11 +11,11 @@
   * [FEATURE] new method `node.navigate()` to support custom keyboard handlers
   * [FEATURE] Refactored CSS style to use a common LESS template
   * [FEATURE] Improvement of lazy load errors handling (Koloto, issue #87)
-  * [FEATURE] Edit extension (alpha)
   * [BUG] Fixed BACKSPACE on top-level nodes
   * [BUG] Fixed #71, #75, #90
   * Improved table render speed by 15%
-  * `grunt dev` combines `grunt server` + `grunt watch`
+  * `grunt dev` combines `grunt server` + `grunt watch` (trigger jshint and 
+    less on save)
   * [FEATURE] Allow to pass metadata with `source` on initialization
 
 
@@ -27,7 +27,7 @@
 # 2.0.0-3
 
   * [BREAKING CHANGE] Changed extension syntax
-  * [FEATURE] Edit extension
+  * [FEATURE] Edit extension (alpha)
 
 
 # 2.0.0-2
